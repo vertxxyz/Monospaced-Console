@@ -1,0 +1,16 @@
+{
+  "name": "com.vertx.monospaced-console",
+  "displayName":  "Monospaced Console",
+  "version": "1.0.0",
+  "unity": "2019.3",
+  "description": "The console, but it's monospaced.",
+  "author": {
+    "name": "Thomas Ingram",
+    "url": "http://vertx.xyz/"
+  },
+  "keywords": [
+    "Editor"
+  ],
+  "category": "Tools",
+  "dependencies": {}
+}

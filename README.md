@@ -1,2 +1,2 @@
-# Monospace-Console
+# Monospaced Unity Console
 Why not?
