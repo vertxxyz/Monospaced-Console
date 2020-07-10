@@ -1,5 +1,10 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
+using UnityEditor.Experimental;
 using UnityEngine;
+using static Vertx.MonospacedConsoleSettings;
+using Font = UnityEngine.Font;
+using Object = UnityEngine.Object;
 
 namespace Vertx
 {
@@ -15,22 +20,91 @@ namespace Vertx
 			};
 		}
 
+		private const string forcedKey = "MSC_FORCED";
+
 		private static void Replacement(int instanceId, Rect selectionRect) => Replacement();
 
 		private static void Replacement(string guid, Rect selectionRect) => Replacement();
 
-		static void Replacement()
+		public static void Replacement(bool force)
+		{
+			SessionState.SetBool(forcedKey, force);
+			EditorApplication.projectWindowItemOnGUI += Replacement;
+			EditorApplication.hierarchyWindowItemOnGUI += Replacement;
+			EditorApplication.RepaintProjectWindow();
+		}
+
+		private static void Replacement()
 		{
 			EditorApplication.projectWindowItemOnGUI -= Replacement;
 			EditorApplication.hierarchyWindowItemOnGUI -= Replacement;
-			Font font = AssetDatabase.LoadAssetAtPath<Font>("Packages/com.vertx.monospaced-console/JetbrainsMono-Regular.ttf");
+			
+			bool force = SessionState.GetBool(forcedKey, false);
+			SessionState.EraseBool(forcedKey);
 
-			ReplaceFont("CN Message");
-
-			void ReplaceFont(string guiStyle)
+			if (force)
 			{
-				GUIStyle box = guiStyle;
-				box.font = font;
+				EditorApplication.delayCall += () =>
+				{
+					Type consoleWindowType = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor");
+					if (consoleWindowType == null)
+						return;
+					var consoleWindows = Resources.FindObjectsOfTypeAll(consoleWindowType);
+					if (consoleWindows == null)
+						return;
+					foreach (Object consoleWindow in consoleWindows)
+						((EditorWindow) consoleWindow).Repaint();
+				};
+			}
+			
+			Font font;
+			switch ((MonospacedConsoleSettings.Font) EditorPrefs.GetInt(FontKey, 0))
+			{
+				case MonospacedConsoleSettings.Font.JetbrainsMono:
+					font = AssetDatabase.LoadAssetAtPath<Font>("Packages/com.vertx.monospaced-console/JetbrainsMono-Regular.ttf");
+					break;
+				case MonospacedConsoleSettings.Font.Consola:
+					font = EditorResources.Load<Font>("consola.ttf");
+					break;
+				default:
+					return;
+			}
+
+			switch ((State) EditorPrefs.GetInt(StateKey, (int) DefaultState))
+			{
+				case State.LogsAndMessage:
+					ReplaceFont("CN Message");
+					ReplaceLogs();
+					break;
+				case State.MessageOnly:
+					ReplaceFont("CN Message");
+					if (force)
+						ReplaceLogs(false);
+					break;
+				default:
+					if (force)
+					{
+						ReplaceFont("CN Message", false);
+						ReplaceLogs(false);
+					}
+					return;
+			}
+
+			void ReplaceLogs(bool replace = true)
+			{
+				ReplaceFont("CN EntryInfo", replace);
+				ReplaceFont("CN EntryWarn", replace);
+				ReplaceFont("CN EntryError", replace);
+				ReplaceFont("CN EntryInfoSmall", replace);
+				ReplaceFont("CN EntryWarnSmall", replace);
+				ReplaceFont("CN EntryErrorSmall", replace);
+			}
+
+			void ReplaceFont(string guiStyle, bool replace = true)
+			{
+				GUIStyle style = guiStyle;
+				style.font = replace ? font : null;
+				style.fontSize = 12;
 			}
 		}
 	}
