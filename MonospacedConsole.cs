@@ -13,6 +13,14 @@ namespace Vertx
 	{
 		static MonospacedConsole()
 		{
+			#if UNITY_2021_2_OR_NEWER
+			Debug.LogWarning("Unity 2021.2+ has built-in support for Monospaced Font in the console." +
+			                 "\nSimply enable \"Use Monospace Font\" in the dropdown at the top right of the Console Window.\n" +
+			                 "Vertx.Monospaced-Console package will attempt to remove itself.");
+			UnityEditor.PackageManager.Client.Remove("com.vertx.monospaced-console");
+			return;
+			#endif
+			
 			EditorApplication.delayCall += () =>
 			{
 				EditorApplication.projectWindowItemOnGUI += Replacement;

@@ -1,0 +1,16 @@
+# Changelog
+All notable changes to this package will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [1.0.2] - 2021-07-23
+ - Automated removal of the package as of 2021.2 Unity, as the console window has support for a monospaced font.
+    If you don't want this behaviour, and still want to use the package, just use version 1.0.1.
+    From this point forward this package is deprecated.
+
+## [1.0.1]
+ - Added setting for replacing messages and switching fonts.
+
+## [1.0.0]
+ - Initial releases
